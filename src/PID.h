@@ -39,6 +39,8 @@ class PID {
   double i_error;
   double d_error;
 
+  double previous_cte;
+
   /**
    * PID Coefficients
    */ 
