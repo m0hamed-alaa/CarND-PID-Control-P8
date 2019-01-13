@@ -1,5 +1,7 @@
-# CarND-Controls-PID
-Self-Driving Car Engineer Nanodegree Program
+# PID controller
+In this project , a PID controller is implemented in C++ to maneuver the vehicle around a track.  
+This project is done as part of Self-Driving Car Engineer Nanodegree Program.
+
 
 ---
 
@@ -24,75 +26,71 @@ Self-Driving Car Engineer Nanodegree Program
     git checkout e94b6e1
     ```
     Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-* Simulator. You can download these from the [project intro page](https://github.com/udacity/self-driving-car-sim/releases) in the classroom.
-
+* This project involves the Term 2 Simulator which can be downloaded [here](https://github.com/udacity/self-driving-car-sim/releases)    
+  
 Fellow students have put together a guide to Windows set-up for the project [here](https://s3-us-west-1.amazonaws.com/udacity-selfdrivingcar/files/Kidnapped_Vehicle_Windows_Setup.pdf) if the environment you have set up for the Sensor Fusion projects does not work for this project. There's also an experimental patch for windows in this [PR](https://github.com/udacity/CarND-PID-Control-Project/pull/3).
 
-## Basic Build Instructions
+---
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+## Running the Code
+Once the install for uWebSocketIO is complete, the main program can be built and run by doing the following from the project top directory.
 
-Tips for setting up your environment can be found [here](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/0949fca6-b379-42af-a919-ee50aa304e6a/lessons/f758c44c-5e40-4e01-93b5-1a82aa4e044f/concepts/23d376c7-0195-4276-bdf0-e02f1f3c665d)
+1. Make a build directory : `mkdir build && cd build`
+2. Compile : `cmake .. && make`
+3. Run it : `./pid`
 
-## Editor Settings
+Alternatively some scripts have been included to streamline this process, these can be leveraged by executing the following in the top directory of the project:
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+1. `./clean.sh`
+2. `./build.sh`
+3. `./run.sh`
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+---
 
-## Code Style
+## Reflection
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+>> PID controller :  
+>>A proportional–integral–derivative controller is a control loop feedback mechanism widely used in industrial control systems and a variety of other applications requiring continuously modulated control. A PID controller continuously calculates an error value as the difference between a desired setpoint (SP) and a measured process variable (PV) and applies a correction based on proportional, integral, and derivative terms (denoted P, I, and D respectively) which give the controller its name.
 
-## Project Instructions and Rubric
+There are different approaches to tune the PID controller gains Kp , Ki , Kd such as manual tuning , stochastic gradient descent and twiddle algorithms. I decided to go with the manual tuning following the tuning rules found in this [post](https://robotics.stackexchange.com/questions/167/what-are-good-strategies-for-tuning-pid-loops). 
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+>>1. Set all gains to zero.
+>>2. Increase the P gain until the response to a disturbance is steady oscillation.
+>>3. Increase the D gain until the the oscillations go away (i.e. it's critically damped).
+>>4. Repeat steps 2 and 3 until increasing the D gain does not stop the oscillations.
+>>5. Set P and D to the last stable values.
+>>6. Increase the I gain until it brings you to the setpoint with the number of oscillations desired.
 
-More information is only accessible by people who are already enrolled in Term 2
-of CarND. If you are enrolled, see [the project page](https://classroom.udacity.com/nanodegrees/nd013/parts/40f38239-66b6-46ec-ae68-03afd8a601c8/modules/f1820894-8322-4bb3-81aa-b26b3c6dcbaf/lessons/e8235395-22dd-4b87-88e0-d108c5e5bbf4/concepts/6a4d8d42-6a04-4aa6-b284-1697c0fd6562)
-for instructions and the project rubric.
+I started with the initial values
+```
+Kp = 0.2 
+Ki = 0
+Kd = 0
+```
+and I realized the vehicle was oscillating around the trajectory so I gradually increased `Kd` as it helps reduce the oscillations.
+```
+Kp = 0.2 
+Ki = 0
+Kd = 1.0
 
-## Hints!
+```
+I started to increase `Ki` a little bit as it helps reduce the steady state error on the long run and after some iterations , I was able to get good results with the following control gain values.
+```
+Kp = 0.13
+Ki = 0.001 
+Kd = 1.0
+```
+In order to improve the vehicle maneuvering at sharp turns , I implemented a PID controller for throttle to control the vehicle speed by lowering the speed at sharp turns so that steering PID controller can apply the sufficient steering that corrects the vehicle trajectory and increasing the speed when the road is straight similar to what happens in the real world case.
+   
+ The setpoint , reference or desired , speed is calculated as a exponential function of the the steering value so when the steering value goes high in either direction at sharp turns , the vehicle speed decreases.
 
-* You don't have to follow this directory structure, but if you do, your work
-  will span all of the .cpp files here. Keep an eye out for TODOs.
+ ![speed-steer](./images/speed-steer.png)
 
-## Call for IDE Profiles Pull Requests
+Then the speed error which is the difference between the reference speed and actual speed measured by the vehicle sensors and returned back by the simulator , is injected to the PID controller to obtain the throttle value needed to reach this reference speed.
 
-Help your fellow students!
-
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to we ensure
-that students don't feel pressured to use one IDE or another.
-
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
-
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+ ```
+ref_speed = exp(-3*fabs(steer_value));
+speed_error = ref_speed - (speed/100);
+pid_throttle.UpdateError(speed_error);
+throttle_value = pid_throttle.TotalError();  
+```
