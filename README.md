@@ -49,17 +49,40 @@ Alternatively some scripts have been included to streamline this process, these 
 
 ## Reflection
 
->> PID controller :  
+> PID controller :  
 >>A proportional–integral–derivative controller is a control loop feedback mechanism widely used in industrial control systems and a variety of other applications requiring continuously modulated control. A PID controller continuously calculates an error value as the difference between a desired setpoint (SP) and a measured process variable (PV) and applies a correction based on proportional, integral, and derivative terms (denoted P, I, and D respectively) which give the controller its name.
+
 
 There are different approaches to tune the PID controller gains Kp , Ki , Kd such as manual tuning , stochastic gradient descent and twiddle algorithms. I decided to go with the manual tuning following the tuning rules found in this [post](https://robotics.stackexchange.com/questions/167/what-are-good-strategies-for-tuning-pid-loops). 
 
->>1. Set all gains to zero.
->>2. Increase the P gain until the response to a disturbance is steady oscillation.
->>3. Increase the D gain until the the oscillations go away (i.e. it's critically damped).
->>4. Repeat steps 2 and 3 until increasing the D gain does not stop the oscillations.
->>5. Set P and D to the last stable values.
->>6. Increase the I gain until it brings you to the setpoint with the number of oscillations desired.
+>1. Set all gains to zero.
+>2. Increase the P gain until the response to a disturbance is steady oscillation.
+>3. Increase the D gain until the the oscillations go away (i.e. it's critically damped).
+>4. Repeat steps 2 and 3 until increasing the D gain does not stop the oscillations.
+>5. Set P and D to the last stable values.
+>6. Increase the I gain until it brings you to the setpoint with the number of oscillations desired.
+
+### P component
+
+It's is proportional to the cross track error. It has direct impact on the trajectory because the cotrol action makes the vehicle correct its direction in proportion to the error.If the proportional gain is high enough , the vehicle will overshoot and the larger values of P , the faster are the oscillations and this causes the vehicle to swivel hard left and right around the target trajectory.
+
+#### The effect of P controller can be watched [here](https://www.youtube.com/watch?v=4Zn5lMgn2UU)
+ 
+### D component
+
+It helps in damping the oscillations by introducing the D component which is proportional to the derivative of the error over time. When the vehicle has turned enough to reduce the error , the D component will sense that the error has been reduced and this causes the controller to apply a counter steering in order to converge to the target trajectory.
+
+#### The effect of PD  controller can be watched [here](https://www.youtube.com/watch?v=LYhUnZ8xbVU)
+
+### I component
+
+It's proportional to the sum of the previous cross track errors over time.It's used to eliminate the systematic biases such as steering drift and reduce the steady-state error.
+
+#### The effect of PID controller can be watched [here](https://www.youtube.com/watch?v=_DAz7sskXm4)
+
+---
+
+## PID tuning
 
 I started with the initial values
 ```
@@ -94,3 +117,4 @@ speed_error = ref_speed - (speed/100);
 pid_throttle.UpdateError(speed_error);
 throttle_value = pid_throttle.TotalError();  
 ```
+
