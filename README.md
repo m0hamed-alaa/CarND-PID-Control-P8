@@ -99,9 +99,9 @@ Kd = 1.0
 ```
 I started to increase `Ki` a little bit as it helps reduce the steady state error on the long run and after some iterations , I was able to get good results with the following control gain values.
 ```
-Kp = 0.13
-Ki = 0.001 
-Kd = 1.0
+Kp = 0.2
+Ki = 0.0001 
+Kd = 2.5
 ```
 In order to improve the vehicle maneuvering at sharp turns , I implemented a PID controller for throttle to control the vehicle speed by lowering the speed at sharp turns so that steering PID controller can apply the sufficient steering that corrects the vehicle trajectory and increasing the speed when the road is straight similar to what happens in the real world case.
    
