@@ -64,7 +64,7 @@ There are different approaches to tune the PID controller gains Kp , Ki , Kd suc
 
 ### P component
 
-It's is proportional to the cross track error. It has direct impact on the trajectory because the cotrol action makes the vehicle correct its direction in proportion to the error.If the proportional gain is high enough , the vehicle will overshoot and the larger values of P , the faster are the oscillations and this causes the vehicle to swivel hard left and right around the target trajectory.
+It's is proportional to the cross track error. It has direct impact on the trajectory because the control action makes the vehicle correct its direction in proportion to the error.If the proportional gain `Kp` is high enough , the vehicle will overshoot and the larger the values of `Kp` , the faster are the oscillations and this causes the vehicle to swivel hard left and right around the target trajectory.
 
 #### The effect of P controller can be watched [here](https://www.youtube.com/watch?v=4Zn5lMgn2UU)
  
