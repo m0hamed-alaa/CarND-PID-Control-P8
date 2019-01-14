@@ -37,9 +37,10 @@ int main() {
   PID pid_throttle;
 
   /**
-   * TODO: Initialize the pid variable.
+   * initialize the pid objects.
    */
-  pid_steer.Init( 0.13 , 0.001 , 1.0 );
+
+  pid_steer.Init( 0.2 , 0.0001 , 2.5 );  
   pid_throttle.Init(0.4,0.0001,0.5);
 
   h.onMessage([&pid_steer,&pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, 
@@ -65,17 +66,13 @@ int main() {
           double ref_speed;
           double speed_error;
       
-          /**
-           * TODO: Calculate steering value here, remember the steering value is
-           *   [-1, 1].
-           * NOTE: Feel free to play around with the throttle and speed.
-           *   Maybe use another PID controller to control the speed!
-           */
-          
-          
+         
+          // PID controller for steering
+
           pid_steer.UpdateError(cte);
           steer_value = pid_steer.TotalError();
 
+          // steer value is limited to [-1,1]
 
           double max_steering = 1;
           if (steer_value > max_steering)
@@ -87,7 +84,9 @@ int main() {
             steer_value = -max_steering;
           }
 
-          ref_speed = exp(-3*fabs(steer_value));
+          // PID controller for throttle
+
+          ref_speed = 1.12*exp(-3*fabs(steer_value));
           speed_error = ref_speed - (speed/100);
           pid_throttle.UpdateError(speed_error);
           throttle_value = pid_throttle.TotalError();
